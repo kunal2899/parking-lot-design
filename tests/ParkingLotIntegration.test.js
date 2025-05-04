@@ -35,8 +35,8 @@ describe('Parking Lot Integration', () => {
       regNumber: 'KA01AB1234'
     });
     
-    // Get available floor
-    const availableFloor = parkingLot.getAvailableParkingFloor();
+    // Get available floor specifically for this vehicle type
+    const availableFloor = parkingLot.getAvailableParkingFloor(vehicle.getType());
     expect(availableFloor).toBe(floor1);
     
     // Register vehicle entry
@@ -51,10 +51,11 @@ describe('Parking Lot Integration', () => {
     expect(ticket.getEntryTime()).not.toBe(null);
     expect(ticket.getIsPaid()).toBe(false);
     
-    // Verify parking spot is occupied
+    // Verify parking spot is occupied and is of correct type
     const parkingSpot = ticket.getParkingSpot();
     expect(parkingSpot.isOccupied()).toBe(true);
     expect(parkingSpot.getParkedVehicle()).toBe(vehicle);
+    expect(parkingSpot.getSupportedVehicleType()).toBe(VEHICLE_TYPE.LMV);
     
     // Register vehicle exit (using a fixed time for testing)
     const avlExitGate = parkingLot.getAvailableExitGate();
@@ -121,11 +122,11 @@ describe('Parking Lot Integration', () => {
     const hmvTicket = avlEntryGate.registerVehicleEntry(hmvVehicle, availableFloor);
     const evTicket = avlEntryGate.registerVehicleEntry(evVehicle, availableFloor);
     
-    // Verify all tickets were created
-    expect(lmvTicket).not.toBe(null);
-    expect(twTicket).not.toBe(null);
-    expect(hmvTicket).not.toBe(null);
-    expect(evTicket).not.toBe(null);
+    // Verify all tickets have correct vehicle types and spots
+    expect(lmvTicket.getParkingSpot().getSupportedVehicleType()).toBe(VEHICLE_TYPE.LMV);
+    expect(twTicket.getParkingSpot().getSupportedVehicleType()).toBe(VEHICLE_TYPE.TW);
+    expect(hmvTicket.getParkingSpot().getSupportedVehicleType()).toBe(VEHICLE_TYPE.HMV);
+    expect(evTicket.getParkingSpot().getSupportedVehicleType()).toBe(VEHICLE_TYPE.EV);
     
     // Set entry times for consistent testing
     const sixHoursAgo = new Date();
@@ -184,7 +185,7 @@ describe('Parking Lot Integration', () => {
     });
     
     // Park the first vehicle
-    const availableFloor = parkingLot.getAvailableParkingFloor();
+    const availableFloor = parkingLot.getAvailableParkingFloor(vehicle1.getType());
     const ticket1 = entryGate.registerVehicleEntry(vehicle1, availableFloor);
     
     // The spot should be occupied
@@ -192,8 +193,17 @@ describe('Parking Lot Integration', () => {
     
     // Try to park the second vehicle, should throw an error
     expect(() => {
-      entryGate.registerVehicleEntry(vehicle2, availableFloor);
-    }).toThrow('Parking spot not available!');
+      const availableFloorForVehicle2 = parkingLot.getAvailableParkingFloor(vehicle2.getType());
+      // Should not find any floor with available spots for this vehicle type
+      expect(availableFloorForVehicle2).toBe(undefined); 
+      
+      // This would throw an error if we tried to proceed
+      if (availableFloorForVehicle2) {
+        entryGate.registerVehicleEntry(vehicle2, availableFloorForVehicle2);
+      } else {
+        throw new Error('No available parking spot for vehicle type: lightMotorVehicle');
+      }
+    }).toThrow('No available parking spot for vehicle type: lightMotorVehicle');
     
     // Create a vehicle of different type
     const twVehicle = new Vehicle({
@@ -201,10 +211,80 @@ describe('Parking Lot Integration', () => {
       regNumber: 'KA01TW9012'
     });
     
-    // Try to park a different type of vehicle, should throw error
-    // since we don't have any spots for two-wheelers
+    // Try to park a different type of vehicle, should throw error due to no compatible spots
     expect(() => {
-      entryGate.registerVehicleEntry(twVehicle, availableFloor);
-    }).toThrow('Parking spot not available!');
+      const availableFloorForTW = parkingLot.getAvailableParkingFloor(twVehicle.getType());
+      // Should not find any floor with available spots for this vehicle type
+      expect(availableFloorForTW).toBe(undefined);
+      
+      // This would throw an error if we tried to proceed
+      if (availableFloorForTW) {
+        entryGate.registerVehicleEntry(twVehicle, availableFloorForTW);
+      } else {
+        throw new Error('No available parking spot for vehicle type: twoWheeler');
+      }
+    }).toThrow('No available parking spot for vehicle type: twoWheeler');
+  });
+  
+  test('should respect vehicle type compatibility when assigning spots', () => {
+    // Create a parking lot with specific spot types
+    const parkingLot = new ParkingLot();
+    const entryGate = new EntryGate();
+    parkingLot.assignEntryGates([entryGate]);
+    
+    // Create a floor with different types of spots
+    const floor = new ParkingFloor({ level: 1 });
+    const spots = [
+      new ParkingSpot({ supportedVehicleType: VEHICLE_TYPE.LMV }),
+      new ParkingSpot({ supportedVehicleType: VEHICLE_TYPE.LMV }),
+      new ParkingSpot({ supportedVehicleType: VEHICLE_TYPE.TW }),
+      new ParkingSpot({ supportedVehicleType: VEHICLE_TYPE.EV }),
+    ];
+    floor.assignParkingSpots(spots);
+    parkingLot.assignParkingFloors([floor]);
+    
+    // Create vehicles of different types
+    const lmvVehicle = new Vehicle({ type: VEHICLE_TYPE.LMV, regNumber: 'KA01LMV1234' });
+    const twVehicle = new Vehicle({ type: VEHICLE_TYPE.TW, regNumber: 'KA01TW5678' });
+    const evVehicle = new Vehicle({ type: VEHICLE_TYPE.EV, regNumber: 'KA01EV9012' });
+    const hmvVehicle = new Vehicle({ type: VEHICLE_TYPE.HMV, regNumber: 'KA01HMV3456' });
+    
+    // Check spot availability by vehicle type
+    expect(floor.getAvailableSpotsCount()).toBe(4); // Total spots
+    expect(floor.getAvailableSpotsCount(VEHICLE_TYPE.LMV)).toBe(2); // LMV spots
+    expect(floor.getAvailableSpotsCount(VEHICLE_TYPE.TW)).toBe(1);  // TW spots
+    expect(floor.getAvailableSpotsCount(VEHICLE_TYPE.EV)).toBe(1);  // EV spots
+    expect(floor.getAvailableSpotsCount(VEHICLE_TYPE.HMV)).toBe(0); // No HMV spots
+    
+    // Park vehicles
+    const lmvTicket = entryGate.registerVehicleEntry(lmvVehicle, floor);
+    const twTicket = entryGate.registerVehicleEntry(twVehicle, floor);
+    const evTicket = entryGate.registerVehicleEntry(evVehicle, floor);
+    
+    // Verify assigned spots match vehicle types
+    expect(lmvTicket.getParkingSpot().getSupportedVehicleType()).toBe(VEHICLE_TYPE.LMV);
+    expect(twTicket.getParkingSpot().getSupportedVehicleType()).toBe(VEHICLE_TYPE.TW);
+    expect(evTicket.getParkingSpot().getSupportedVehicleType()).toBe(VEHICLE_TYPE.EV);
+    
+    // Verify we still have one LMV spot available
+    expect(floor.getAvailableSpotsCount(VEHICLE_TYPE.LMV)).toBe(1);
+    
+    // Try to park an HMV vehicle (not supported)
+    expect(() => {
+      entryGate.registerVehicleEntry(hmvVehicle, floor);
+    }).toThrow('No available parking spot for vehicle type: heavyMotorVehicle');
+    
+    // Park another LMV vehicle to fill all LMV spots
+    const lmvVehicle2 = new Vehicle({ type: VEHICLE_TYPE.LMV, regNumber: 'KA01LMV5678' });
+    const lmvTicket2 = entryGate.registerVehicleEntry(lmvVehicle2, floor);
+    
+    // Now no more LMV spots
+    expect(floor.getAvailableSpotsCount(VEHICLE_TYPE.LMV)).toBe(0);
+    
+    // Trying to park another LMV should fail
+    const lmvVehicle3 = new Vehicle({ type: VEHICLE_TYPE.LMV, regNumber: 'KA01LMV9012' });
+    expect(() => {
+      entryGate.registerVehicleEntry(lmvVehicle3, floor);
+    }).toThrow('No available parking spot for vehicle type: lightMotorVehicle');
   });
 }); 

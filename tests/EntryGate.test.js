@@ -56,7 +56,7 @@ describe('EntryGate', () => {
     
     expect(() => {
       entryGate.registerVehicleEntry(vehicle, floor);
-    }).toThrow('Parking spot not available!');
+    }).toThrow('No available parking spot for vehicle type: lightMotorVehicle');
   });
 
   test('should throw error for invalid vehicle', () => {
