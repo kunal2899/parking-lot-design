@@ -34,8 +34,15 @@ class EntryGate {
   registerVehicleEntry = (vehicle, avlParkingFloor) => {
     if (!validateValue(vehicle, Vehicle))
       throw new Error("Parking not available for this type of vehicle!");
-    const avlParkingSpot = avlParkingFloor.getAvailableParkingSpot();
-    if (!avlParkingSpot) throw new Error("Parking spot not available!");
+      
+    // Get available spot that can accommodate this specific vehicle type
+    const vehicleType = vehicle.getType();
+    const avlParkingSpot = avlParkingFloor.getAvailableParkingSpot(vehicleType);
+    
+    if (!avlParkingSpot) {
+      throw new Error(`No available parking spot for vehicle type: ${vehicleType}`);
+    }
+    
     avlParkingSpot.parkVehicle(vehicle);
     const parkingTicket = this.#generateTicket(vehicle, avlParkingFloor, avlParkingSpot);
     return parkingTicket;

@@ -25,12 +25,25 @@ class ParkingLot {
   getEntryGates = () => this.#entryGates;
   getExitGates = () => this.#exitGates;
   getAllParkingFloors = () => this.#parkingFloors;
+  
+  // Get all available parking floors
   getAllAvailableParkingFloors = () =>
     filter(
       this.#parkingFloors,
       (parkingFloor) => parkingFloor.getFloorAvailability().isAvailable
     );
-  getAvailableParkingFloor = () => first(this.getAllAvailableParkingFloors());
+  
+  // Get first available parking floor with space for a specific vehicle type
+  getAvailableParkingFloor = (vehicleType = null) => {
+    // Filter floors that are available and have at least one spot for the vehicle type
+    const availableFloors = filter(
+      this.getAllAvailableParkingFloors(),
+      (floor) => vehicleType === null || floor.getAvailableSpotsCount(vehicleType) > 0
+    );
+    
+    return first(availableFloors);
+  };
+  
   getAllAvailableEntryGates = () =>
     filter(this.#entryGates, (entryGate) => entryGate.isOperational());
   getAllAvailableExitGates = () =>
@@ -65,9 +78,12 @@ class ParkingLot {
           throw new Error('Parking lot is closed!');
         }
         
-        const availableFloor = this.getAvailableParkingFloor();
+        // Get available floor that can accommodate this vehicle type
+        const vehicleType = vehicle.getType();
+        const availableFloor = this.getAvailableParkingFloor(vehicleType);
+        
         if (!availableFloor) {
-          throw new Error('No parking floor available!');
+          throw new Error(`No parking floor available for ${vehicleType}!`);
         }
         
         const avlEntryGate = this.getAvailableEntryGate();

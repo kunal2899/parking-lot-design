@@ -10,7 +10,7 @@ class ParkingFloor {
     this.#level = level;
     this.#isAvailable = isAvailable;
     this.#unAvailabilityReasons = unAvailabilityReasons;
-    this.#parkingSpots = null;
+    this.#parkingSpots = [];
   }
 
   // Getters
@@ -21,8 +21,25 @@ class ParkingFloor {
     return { isAvailable: false, reason: this.#unAvailabilityReasons }
   }
   getAllParkingSpots = () => this.#parkingSpots;
-  getAllAvailableParkingSpots = () => filter(this.#parkingSpots, parkingSpot => !parkingSpot.isOccupied());
-  getAvailableParkingSpot = () => first(this.getAllAvailableParkingSpots());
+  
+  // Get all available parking spots (optionally filtered by vehicle type)
+  getAllAvailableParkingSpots = (vehicleType = null) => {
+    return filter(this.#parkingSpots, parkingSpot => {
+      // Check both occupancy AND vehicle type compatibility if specified
+      return !parkingSpot.isOccupied() && 
+        (vehicleType === null || parkingSpot.canAccommodate(vehicleType));
+    });
+  };
+  
+  // Get first available parking spot for a specific vehicle type
+  getAvailableParkingSpot = (vehicleType = null) => {
+    return first(this.getAllAvailableParkingSpots(vehicleType));
+  };
+
+  // Get count of available spots by vehicle type
+  getAvailableSpotsCount = (vehicleType = null) => {
+    return this.getAllAvailableParkingSpots(vehicleType).length;
+  };
 
   assignParkingSpots = parkingSpots => {
     if (!validateValue(parkingSpots, ParkingSpot)) {
