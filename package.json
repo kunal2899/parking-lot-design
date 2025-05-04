@@ -3,13 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {},
-  "devDependencies": {
+  "dependencies": {
     "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   },
   "type": "commonjs",
   "scripts": {
-    "start": "node src/index"
+    "start": "node src/index",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
