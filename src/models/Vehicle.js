@@ -16,6 +16,8 @@ class Vehicle {
   // Setters
   setVehicleType = type => { this.#type = type }
   setRegNumber = regNumber => { this.#regNumber = regNumber }
+
+  toString = () => `Vehicle ID: ${this.#id},\nType: ${this.#type},\nRegistration Number: ${this.#regNumber}`;
 }
 
 module.exports = Vehicle;

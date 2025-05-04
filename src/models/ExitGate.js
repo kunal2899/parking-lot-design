@@ -55,6 +55,8 @@ class ExitGate {
   registerVehicleExit = (ticket) => {
     this.#validateTicket(ticket);
     const updatedTicket = this.#collectParkingFee(ticket);
+    const parkingSpot = updatedTicket.getParkingSpot();
+    parkingSpot.unparkVehicle();
     return updatedTicket;
   }
 

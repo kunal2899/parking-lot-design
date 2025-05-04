@@ -17,10 +17,8 @@ class EntryGate {
   #generateTicket = (vehicle, parkingFloor, parkingSpot) => {
     return new Ticket()
       .setVehicleDetails(vehicle)
-      .setParkingSpotLabel(
-        parkingFloor.getFloorLevel(),
-        parkingSpot.getSpotId()
-      )
+      .setParkingFloor(parkingFloor)
+      .setParkingSpot(parkingSpot)
       .logEntryTime();
   };
   

@@ -4,7 +4,7 @@ const Vehicle = require("./Vehicle");
 class ParkingSpot {
   #id; #supportedVehicleType; #isOccupied; #vehicle;
 
-  constructor(supportedVehicleType) {
+  constructor({ supportedVehicleType }) {
     this.#id = uniqueId('parking-spot-');
     this.#supportedVehicleType = supportedVehicleType;
     this.#isOccupied = false;

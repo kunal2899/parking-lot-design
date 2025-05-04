@@ -35,15 +35,17 @@ try {
 
   const ticket = avlEntryGate.registerVehicleEntry(vehicle, availableFloor);
   
-  console.log('Parking ticket generated:', ticket);
-  
+  console.log('Parking ticket generated -');
+  ticket.printTicket();
+
   // Later when vehicle exits
   const avlExitGate = parkingLot.getAvailableExitGate();
   if (!avlExitGate) throw new Error('No exit gate available!');
 
   const updatedTicket = avlExitGate.registerVehicleExit(ticket);
   
-  console.log('Final ticket after payment:', updatedTicket);
+  console.log('Final ticket after payment -');
+  updatedTicket.printTicket();
 } catch(error) {
-  console.error('Error:', error.message);
+  console.error('Error in main:', error.message);
 }
