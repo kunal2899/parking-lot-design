@@ -1,0 +1,24 @@
+{
+  "name": "parking-lot-design",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "lodash": "^4.17.21"
+  },
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kunal2899/parking-lot-design.git"
+  },
+  "author": "Kunal Jain",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kunal2899/parking-lot-design/issues"
+  },
+  "homepage": "https://github.com/kunal2899/parking-lot-design#readme"
+}
