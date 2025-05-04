@@ -26,12 +26,15 @@ class ParkingSpot {
     if (!vehicle instanceof Vehicle) throw new Error('Invalid Vehicle!');
     this.#vehicle = vehicle;
     this.#isOccupied = true;
+    return this;
   }
+  
   unparkVehicle = () => {
     if (!this.#isOccupied)
       throw new Error('Parking spot already empty!');
     this.#vehicle = null;
     this.#isOccupied = false;
+    return this;
   }
 }
 

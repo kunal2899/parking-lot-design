@@ -10,12 +10,13 @@ class Vehicle {
   }
 
   // Getters
+  getId = () => this.#id;
   getType = () => this.#type;
   getVehicleRegNumber = () => this.#regNumber;
 
   // Setters
-  setVehicleType = type => { this.#type = type }
-  setRegNumber = regNumber => { this.#regNumber = regNumber }
+  setVehicleType = type => { this.#type = type; }
+  setRegNumber = regNumber => { this.#regNumber = regNumber; }
 
   toString = () => `Vehicle ID: ${this.#id},\nType: ${this.#type},\nRegistration Number: ${this.#regNumber}`;
 }

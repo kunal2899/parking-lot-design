@@ -14,6 +14,7 @@ class ParkingFloor {
   }
 
   // Getters
+  getId = () => this.#id;
   getFloorLevel = () => this.#level;
   getFloorAvailability = () => {
     if (this.#isAvailable) return { isAvailable: true };

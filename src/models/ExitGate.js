@@ -11,8 +11,16 @@ class ExitGate {
     this.#isOperational = isOperational;
   }
 
+  // Getters
+  getId = () => this.#id;
   getOperationalStatus = () => this.#isOperational;
   isOperational = () => this.#isOperational === true;
+  
+  // Setters
+  setOperational = (status) => {
+    this.#isOperational = status;
+    return this;
+  };
 
   #validateTicket = (ticket) => {
     if (!ticket ||!ticket instanceof Ticket) throw new Error("Invalid ticket!");
@@ -59,7 +67,6 @@ class ExitGate {
     parkingSpot.unparkVehicle();
     return updatedTicket;
   }
-
 }
 
 module.exports = ExitGate;

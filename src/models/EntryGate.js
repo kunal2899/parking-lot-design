@@ -6,13 +6,22 @@ const Ticket = require("./Ticket");
 class EntryGate {
   #id;
   #isOperational;
+  
   constructor(isOperational = true) {
     this.#id = uniqueId("entry-gate-");
     this.#isOperational = isOperational;
   }
 
+  // Getters
+  getId = () => this.#id;
   getOperationalStatus = () => this.#isOperational;
   isOperational = () => this.#isOperational === true;
+  
+  // Setters
+  setOperational = (status) => {
+    this.#isOperational = status;
+    return this;
+  };
 
   #generateTicket = (vehicle, parkingFloor, parkingSpot) => {
     return new Ticket()

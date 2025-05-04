@@ -14,12 +14,13 @@ class ParkingLot {
   constructor(isOpen = true) {
     this.#id = uniqueId("parking-lot-");
     this.#isOpen = isOpen;
-    this.#entryGates = null;
-    this.#exitGates = null;
-    this.#parkingFloors = null;
+    this.#entryGates = [];
+    this.#exitGates = [];
+    this.#parkingFloors = [];
   }
 
   // Getters
+  getId = () => this.#id;
   getOpeningStatus = () => this.#isOpen;
   getEntryGates = () => this.#entryGates;
   getExitGates = () => this.#exitGates;
@@ -43,16 +44,64 @@ class ParkingLot {
     }
     this.#parkingFloors = parkingFloors;
   };
+  
   assignEntryGates = (entryGates) => {
     if (!validateValue(entryGates, EntryGate))
       throw new Error(`Can't assign invalid entry point!`);
     this.#entryGates = entryGates;
   };
+  
   assignExitGates = (exitGates) => {
     if (!validateValue(exitGates, ExitGate))
       throw new Error(`Can't assign invalid exit points!`);
     this.#exitGates = exitGates;
   };
+  
+  // Example methods for concurrent operations demo (simple Promise wrappers)
+  parkVehicle(vehicle) {
+    return new Promise((resolve, reject) => {
+      try {
+        if (!this.#isOpen) {
+          throw new Error('Parking lot is closed!');
+        }
+        
+        const availableFloor = this.getAvailableParkingFloor();
+        if (!availableFloor) {
+          throw new Error('No parking floor available!');
+        }
+        
+        const avlEntryGate = this.getAvailableEntryGate();
+        if (!avlEntryGate) {
+          throw new Error('No entry gate available!');
+        }
+        
+        const ticket = avlEntryGate.registerVehicleEntry(vehicle, availableFloor);
+        resolve(ticket);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  
+  exitVehicle(ticket) {
+    return new Promise((resolve, reject) => {
+      try {
+        if (!this.#isOpen) {
+          throw new Error('Parking lot is closed!');
+        }
+        
+        const avlExitGate = this.getAvailableExitGate();
+        if (!avlExitGate) {
+          throw new Error('No exit gate available!');
+        }
+        
+        const updatedTicket = avlExitGate.registerVehicleExit(ticket);
+        resolve(updatedTicket);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }
 
 module.exports = ParkingLot;

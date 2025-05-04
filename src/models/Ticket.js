@@ -17,6 +17,7 @@ class Ticket {
   }
 
   // Getters
+  getId = () => this.#id;
   getPrice = () => this.#price;
   getParkingSpotLabel = () => this.#parkingSpotLabel;
   getEntryTime = () => this.#entryTime;
@@ -25,6 +26,7 @@ class Ticket {
   getIsPaid = () => this.#isPaid;
   getParkingSpot = () => this.#parkingSpot;
   getParkingFloor = () => this.#parkingFloor;
+  
   // Setters
   setPrice = (price) => {
     this.#price = price;
